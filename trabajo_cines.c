@@ -9,9 +9,15 @@
 int asientoslibres(char fichero[]);
 void pantalla(char fichero[]);
 char pedirletra();//pide el asiento del cine
+int pedirnumero();
+int Pediropcion();
 char Pedirchar();
+void comprarentrada(char fichero[]);
+void pedirTarjeta();//pide un numero de tarjeta de 16 digitos
+void pedirpin();//pide un pin de 4 digitos
 void leyenda(int i);//Leyenda de la sala
 void resetpantalla(char fichero[]);//resetea las salas
+void resetusuarios();//resetea los usuarios
 
 struct TUsuario {
 	char nombre[50];
@@ -535,5 +541,255 @@ void resetpantalla(char fichero[]) {
 		fprintf(Pantalla, "\n\n");
 	}
 	fclose(Pantalla);
+	return;
+}
+void comprarentrada(char nFichero[]) {
+	FILE*Usuarios;
+	FILE*Pantalla;
+	errno_t error;
+	struct TUsuario usu[NUMUSUARIOS];
+	struct TAux aux;
+	int opcion, comp1, k = 0, i, auxx = 0, nusu = 0, nasientos, nentradas, cont, ntarjeta, pin, n;
+	char letra = 'A', salir, lasiento;
+	int sala[TMATRIZ][TMATRIZ], j, casiento;//columna del aiento
+	char opcion2;
+	float precio = 7.75;
+	fopen_s(&Pantalla, nFichero, "r");
+	fopen_s(&Usuarios, "usuarios.txt", "r");
+	fscanf_s(Usuarios, "%d", &nusu);//Lee del fichero el numero de usuarios
+	if (nusu != 0) {//Si no es 0, lee el fichero completo
+		for (i = 0; i < nusu; i++) {
+			fscanf_s(Usuarios, "%s\t", usu[i].nombre, 50);
+			fscanf_s(Usuarios, "%s\t", usu[i].contrasena, 50);
+			fscanf_s(Usuarios, "%s\t", usu[i].ntarjeta, 25);
+			fscanf_s(Usuarios, "%d\t", &usu[i].nentradas);
+		}
+	}
+	fclose(Usuarios);
+	printf("\250Cu\240ntas quieres comprar? Precio por entrada : %.2f$\n", precio);
+	scanf_s("%d", &nentradas);
+	precio = precio * nentradas;//calcula el precio
+	cont = nentradas;
+	printf("Tienes que pagar: %.2f $\n", precio);
+	for (n = 0; n < cont; n++) {//se repite hasta que hayas elegido el mismo nº de asientos que entradas
+		for (i = 0; i < TMATRIZ; i++) {//lee el fichero
+			for (j = 0; j < TMATRIZ - 1; j++) {
+				fscanf_s(Pantalla, "%d    ", &sala[i][j]);
+			}
+			fscanf_s(Pantalla, "%d\n\n", &sala[i][j]);
+		}
+		fclose(Pantalla);
+		nasientos = asientoslibres(nFichero);//nº de asientos disponibles 
+		if (n == 0) {//n=0 para que solo entre la primera vez
+			if (nasientos < nentradas) {//si no hay asientos suficientes
+				system("cls");
+				printf("No hay asientos disponibles, solo quedan %d\n", nasientos);
+				
+			}
+		}
+		pantalla(nFichero);
+		do {
+			lasiento = pedirletra();//llamamos lasiento (letra del asiento) para poder utilizar mas tarde
+			if (lasiento == 's') {// para salir
+		 		fflush (stdin);
+			}
+			i = (int)lasiento - 65;//lo`pasamos a un entero
+			casiento = pedirnumero();
+			if (sala[i][casiento - 1] == 1) {//si es un 1 esta ocupado si es 0 esta libre
+				system("cls");
+				//getchar();
+				pantalla(nFichero);
+				printf("El asiento ya est\240 ocupado\n");
+			}
+			//getchar();
+		} while (sala[i][casiento - 1] == 1);//se repite si esta ocupado
+		sala[i][casiento - 1] = 2;//llamamos 2 al asiento que acabas de seleccionar
+		system("cls");
+		printf("    ");
+		for (i = 0; i < TMATRIZ; i++) {//imprimimos la sala
+			printf("     %d  ", i + 1);
+		}
+		printf("\n\n");
+		for (i = 0; i < TMATRIZ; i++) {
+			printf("  %c    ", letra + i);
+			for (j = 0; j < TMATRIZ; j++) {
+				if (sala[i][j] == 0) {
+					printf("\263\332\277\263    ");//libre
+				}
+				else if (sala[i][j] == 2) {//el que quieres seleccionar lo pone en interrogaciones
+					printf("\263\250\077\263    ");
+				}
+				else {
+					printf("\263\261\261\263    ");//ocupado
+				}
+			}
+			leyenda(i);
+		}
+		printf("\t\t\t\311\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\273\n");
+		printf("\t\t\t\272          PANTALLA           \272\n\n");
+		do {
+			getchar();
+			printf("\250Quieres este asiento? %c%d: S-si N-no\n", lasiento, casiento);
+			opcion2 = Pedirchar();
+			i = (int)lasiento - 65;
+			if (opcion2 == 's' || opcion2 == 'S') {
+				printf("Has elegido el asiento %c%d\n", lasiento, casiento);
+				sala[i][casiento - 1] = 1;//pasa a estar ocupado 
+			}
+			else if (opcion2 == 'n' || opcion2 == 'N') {
+				printf("Elige asiento de nuevo\n");
+				sala[i][casiento - 1] = 0;//vuelve a estar libre
+				cont++;//para que se repita hasta que cojas el numero de asientos que has elegido
+					   //getchar();
+			}
+			else {
+				printf("opci\242n incorrecta\n");
+				opcion2 = 0;
+				getchar();
+			}
+			//getchar();
+		} while (opcion2 == 0);
+		fopen_s(&Pantalla, nFichero, "w");
+		for (i = 0; i < TMATRIZ; i++) {//guarda en el fichero los nuevos asientos cogidos
+			for (j = 0; j < TMATRIZ; j++) {
+				fprintf(Pantalla, "%d    ", sala[i][j]);
+			}
+			fprintf(Pantalla, "\n\n");
+		}
+		fclose(Pantalla);
+		system("cls");
+	}
+
+
+	getchar();
+	printf("\250Eres usuario? S-si  N-no\n");
+	switch (Pedirchar()) {
+	case 's':
+	case 'S':
+		printf("Introduzca su nombre de usuario\n");
+		scanf_s("%s", &aux.nombre, 50);
+		getchar();
+		for (k = 0; k < nusu; k++) {
+			comp1 = strcmp(aux.nombre, usu[k].nombre); //Compara entre todos los usuarios ya registrados
+			if (comp1 == 0) {
+				break;
+			}
+		}
+		if (comp1 == 0) {//Si coincide con algun nombre
+			system("cls");
+			printf("Bienvenido %s\n", usu[k].nombre);
+			if (usu[k].nentradas > 9) {//si ya has comprado 10 entradas o mas te regalamos 1
+				printf("Por ser usuario tienes una entrada de regalo por cada 10 entradas compradas, tienes %d, \250quieres usar el descuento? S-Si N-No\n", usu[k].nentradas);
+				switch (Pedirchar()) {
+				case 's':
+				case 'S':
+					usu[k].nentradas = usu[k].nentradas - 10;
+					printf("Tienes que pagar %.2f$\n", precio - 7.75);
+					break;
+				case 'n':
+				case 'N':
+					printf("Tienes que pagar %.2f$", precio);
+					break;
+				}
+			}
+			else {
+				printf("Te quedan %d entradas para conseguir una entrada gratis\n", 10 - usu[k].nentradas);// si no llegas a 10  entradas compradas o ya has usado el cupon en otra ocasion
+			}
+			do {
+				printf("Introduzca su contrase\244a para pagar\n");
+				scanf_s("%s", &aux.contrasena, 50);
+				getchar();
+				comp1 = strcmp(aux.contrasena, usu[k].contrasena); //Compara  si es la contraseña
+				if (comp1 == 0) {
+					usu[k].nentradas = nentradas + usu[k].nentradas;//suma a las entradas ya existentes la nueva compra
+					printf("Pago correcto\n");
+					fopen_s(&Usuarios, "usuarios.txt", "w");
+					fprintf(Usuarios, "%d\n", nusu);
+					for (i = 0; i < nusu; i++) {//guardar en el fichero 
+						fprintf(Usuarios, "%s\t%s\t%s\t%d\n", usu[i].nombre, usu[i].contrasena, usu[i].ntarjeta, usu[i].nentradas);
+					}
+					fclose(Usuarios);
+				}
+				else {
+					printf("contrase\244a incorrecta, vuelva a intentarlo\n");
+				}
+			} while (comp1 != 0); //Hasta que la contraseña sea correcta se repite
+		}
+		else {
+			printf("Lo sentimos, no se encuentra entre nuestros usuarios, reg\241strese como uno nuevo.\n");
+		}
+		break;
+	case 'n':
+	case 'N':// si no eres usuario
+		system("cls");
+		getchar();
+		printf("\nSi quieres ser usuario registrate gratis en nuestra web, tendras cientos de descuentos\n\n");
+		printf("\250Desea pagar con T-Tarjeta o C-Cash. En caso de error pulse cualquier otra tecla\n");
+		switch (Pedirchar()) {
+		case 'T':
+		case 't':
+			pedirTarjeta();
+			pedirpin();
+			printf("Pago aceptado\n");
+			break;
+		case 'C':
+		case'c':
+			printf("Recuerde pagar en taquilla son %.2f$\n", precio);
+			break;
+		default:
+			
+			break;
+		}
+	}
+	return;
+}
+
+void pedirTarjeta() {
+	getchar();
+	char ntarjeta[50];
+	do {
+		printf("Introduce n\243mero tarjeta\n");
+		gets(ntarjeta);
+		if (strlen(ntarjeta) != 16) {
+			printf("n\243mero tarjeta incorrecto (tienen que ser 16 digitos)\n ");
+		}
+	} while (strlen(ntarjeta) != 16);//si la longitud es diferente a 16 vuelve a repetir
+	ntarjeta[17] = '\0';
+
+}
+
+void pedirpin() {
+	char npin[10];
+	do {
+		printf("Introduce n\243mero secreto\n");
+		gets(npin);
+		if (strlen(npin) != 4) {
+			printf("n\243mero pin incorrecto, tiene que tener 4 d\241gitos\n ");
+		}
+	} while (strlen(npin) != 4);//si la longitud es diferente a 4 vuelve a repetir
+	npin[5] = '\0';
+
+}
+
+void resetpantalla(char fichero[]) {
+	FILE*Pantalla;
+	fopen_s(&Pantalla, fichero, "w");
+	int i, j, sala[TMATRIZ][TMATRIZ];
+	for (i = 0; i < TMATRIZ; i++) {
+		for (j = 0; j < TMATRIZ; j++) {
+			sala[i][j] = 0;
+			fprintf(Pantalla, "%d    ", sala[i][j]);
+		}
+		fprintf(Pantalla, "\n\n");
+	}
+	fclose(Pantalla);
+	return;
+}
+
+void resetusuarios() {
+	FILE*Usuarios;
+	fopen_s(&Usuarios, "usuarios.txt", "w");
+	fprintf(Usuarios, "0");
+	fclose(Usuarios);
 	return;
 }
