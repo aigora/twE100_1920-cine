@@ -5,13 +5,19 @@ En este trabajo se simulará una página web de un cine a través del cual podra
 ## Integrantes del equipo
 
 Blanca Expósito Gonzalez Usuario: @blancaexpositogonzalez
+
 José Ignacio Brea García Usuario: @jibrea
+
 Diego Bartolome Sanza Usuario: @diegobartolome
 
 ## Objetivos del trabajo
 
 Con una matriz y un sistema de coordenadas poder elegir el asiento en la sala.
+
 Aplicar descuentos a los usuarios.
+
 Implementar fecha y hora.
+
 Seleccion de dias de la pelicula.
+
 Al pasar la hora de la pelicula los asientos se resetean.
