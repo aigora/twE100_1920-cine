@@ -1,3 +1,18 @@
+//Antes de empezar se debe resetear (meterse en empleados usuario:Bartolo y contraseña:9876 y dar a resetear)
+
+#include <stdio.h>
+#include <stdlib.h>
+#include<string.h>
+#define TMATRIZ 9//tamaño matriz de los asientos del cine
+#define NUMUSUARIOS 25
+
+int asientoslibres(char fichero[]);
+void pantalla(char fichero[]);
+char pedirletra();//pide el asiento del cine
+char Pedirchar();
+void leyenda(int i);//Leyenda de la sala
+void resetpantalla(char fichero[]);//resetea las salas
+
 struct TUsuario {
 	char nombre[50];
 	char contrasena[50];
@@ -400,4 +415,125 @@ void main() {
 		system("cls");
 
 	}
+}
+
+int asientoslibres(char fichero[]) {//cuenta el numero de asientos libres
+	FILE*Pantalla;
+	int sala[TMATRIZ][TMATRIZ], i, j, cont = 0;
+	fopen_s(&Pantalla, fichero, "r");
+	for (i = 0; i < TMATRIZ; i++) {
+		for (j = 0; j < TMATRIZ - 1; j++) {
+			fscanf_s(Pantalla, "%d    ", &sala[i][j]);
+		}
+		fscanf_s(Pantalla, "%d\n\n", &sala[i][j]);
+	}
+	fclose(Pantalla);
+	for (i = 0; i < TMATRIZ; i++) {
+		for (j = 0; j < TMATRIZ; j++) {
+			if (sala[i][j] == 0) {
+				cont++;
+			}
+		}
+	}
+	return cont;
+}
+
+void pantalla(char fichero[]) {//imprime por pantalla la sala de cine
+	FILE*Pantalla;
+	char letra = 'A';
+	int sala[TMATRIZ][TMATRIZ], i, j;
+	fopen_s(&Pantalla, fichero, "r");
+	for (i = 0; i < TMATRIZ; i++) {//leemos el fichero
+		for (j = 0; j < TMATRIZ - 1; j++) {
+			fscanf_s(Pantalla, "%d    ", &sala[i][j]);
+		}
+		fscanf_s(Pantalla, "%d\n\n", &sala[i][j]);
+	}
+	fclose(Pantalla);
+	printf("    ");
+	for (i = 0; i < TMATRIZ; i++) {
+		printf("     %d  ", i + 1);
+	}
+	printf("\n\n");
+	for (i = 0; i < TMATRIZ; i++) {
+		printf("  %c    ", letra + i);
+		for (j = 0; j < TMATRIZ; j++) {
+			if (sala[i][j] == 0) {
+				printf("\263\332\277\263    ");
+			}
+			else {
+				printf("\263\261\261\263    ");
+			}
+		}
+		leyenda(i);
+	}
+	printf("\t\t\t\311\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\273\n");
+	printf("\t\t\t\272          PANTALLA           \272\n\n");
+	
+}
+
+char pedirletra() {
+	char letra;
+	getchar();
+	do {
+		printf("Introduce Asiento (primero letra luego n\243mero) o S-si quieres salir \n");
+		scanf_s("%c", &letra);
+		if (letra == 's' || letra == 'S') {
+			return 's';
+		}
+		if (letra >= 'A'&&letra <= 'I' || letra >= 'a'&&letra <= 'i') {//solo hay 9 columnas y 9 filas 
+			if (letra >= 'a' && letra <= 'i') {
+				letra = letra - 32;//pasamos todo a mayusculas
+			}
+		}
+		else {
+			printf("Letra incorrecta, introduce una letra desde A hasta I\n");
+			letra = 0;
+			getchar();
+			getchar();
+		}
+	} while (letra == 0);
+	return letra;
+}
+
+void leyenda(int i) {
+	if (i == 3) {
+		printf("\t\t\332\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\277");
+	}
+	if (i == 4) {
+		printf("\t\t\263  \263\332\277\263  Asiento vac\241o    \263");
+	}
+	if (i == 5) {
+		printf("\t\t\263  \263\261\261\263  Asiento ocupado  \263");
+	}
+	if (i == 6) {
+		printf("\t\t\263  \263\250\077\263  Elecci\242n asiento \263");
+	}
+	if (i == 7) {
+		printf("\t\t\300\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\304\331");
+	}
+	printf("\n\n");
+	return;
+}
+
+char Pedirchar() {
+	char opc;
+	printf("Introduce opci\242n\n");
+	scanf_s("%c", &opc);
+	return opc;
+}
+
+void resetpantalla(char fichero[]) {
+	FILE*Pantalla;
+	fopen_s(&Pantalla, fichero, "w");
+	int i, j, sala[TMATRIZ][TMATRIZ];
+	for (i = 0; i < TMATRIZ; i++) {
+		for (j = 0; j < TMATRIZ; j++) {
+			sala[i][j] = 0;
+			fprintf(Pantalla, "%d    ", sala[i][j]);
+		}
+		fprintf(Pantalla, "\n\n");
+	}
+	fclose(Pantalla);
+	return;
 }
