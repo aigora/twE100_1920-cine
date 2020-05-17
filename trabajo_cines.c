@@ -18,6 +18,9 @@ void pedirpin();//pide un pin de 4 digitos
 void leyenda(int i);//Leyenda de la sala
 void resetpantalla(char fichero[]);//resetea las salas
 void resetusuarios();//resetea los usuarios
+void tiempo();
+void disponible(int horario);
+
 
 struct TUsuario {
 	char nombre[50];
@@ -45,10 +48,6 @@ void main() {
 	errno_t error;
 	struct TUsuario usu[NUMUSUARIOS];
 	struct TAux aux;
-	//reloj
-	time_t tiempo;
-	char cad[80];
-	struct tm * ptiempo;
 
 	while (1) {
 		fopen_s(&Usuarios, "usuarios.txt", "r");
@@ -69,14 +68,6 @@ void main() {
 		fopen_s(&Infantil, "Infantil.txt", "r");
 
 		printf("	BIENVENIDO A CINES BARTOLO S.L.	 \n\n");
-		
-		//reloj
-		time( &tiempo );
-		
-		ptiempo = localtime( &tiempo );
-		strftime(cad,80,"%x  -  %I:%M %p", ptiempo);
-		printf("\n Fecha y Hora :   %s  \n\n", cad );
-		
 		printf(" 1 - Cartelera\n");
 		printf(" 2 - Registrarse\n");
 		printf(" 3 - Atenci\242n al cliente\n");
@@ -96,6 +87,7 @@ void main() {
 			switch (Pediropcion()) {
 			case 1:
 				system("cls");
+				tiempo();
 				while ((cartelera = fgetc(Comedia)) != EOF) {//Imprimimos el fichero entero
 					printf("%c", cartelera);
 				}
@@ -125,6 +117,7 @@ void main() {
 				break;
 			case 2:
 				system("cls");
+				tiempo();
 				while ((cartelera = fgetc(Accion)) != EOF) {
 					printf("%c", cartelera);
 				}
@@ -162,6 +155,7 @@ void main() {
 				break;
 			case 3:
 				system("cls");
+				tiempo();
 				while ((cartelera = fgetc(Terror)) != EOF) {
 					printf("%c", cartelera);
 				}
@@ -191,6 +185,7 @@ void main() {
 				break;
 			case 4:
 				system("cls");
+				tiempo();
 				while ((cartelera = fgetc(Romance)) != EOF) {
 					printf("%c", cartelera);
 				}
@@ -220,6 +215,7 @@ void main() {
 				break;
 			case 5:
 				system("cls");
+				tiempo();
 				while ((cartelera = fgetc(Infantil)) != EOF) {
 					printf("%c", cartelera);
 				}
@@ -273,7 +269,7 @@ void main() {
 					}
 					else {
 						strcpy_s(usu[nusu].nombre, 50, aux.nombre); //guarda el nombre nuevo en usuarios
-						printf("Introduzca su contrasena\n");
+						printf("Introduzca su contrase\244a\n");
 						scanf_s("%s", &usu[nusu].contrasena, 50);
 						printf("Introduzca su numero de tarjeta\n");
 						scanf_s("%s", &usu[nusu].ntarjeta, 25);
@@ -323,11 +319,13 @@ void main() {
 			}
 			break;
 		case 4:
+			system("cls");
 			printf(" Ubicaci\242n:\n   -La Rotonda, Tres Cantos\n   -Avda. Doctor Garc\241a Tapia 220, Moratalaz\n   -C/ Anacleto Agente Secreto 22, Rivas Vaciamadrid\n");
 			printf(" N\243mero de contacto: 605926055\n");
 			break;
 		case 5:
-			printf("Cines Bartolo se compromete a adoptar una pol\241tica de confidencialidad, con el objeto de proteger la privacidad de la informaci\242n personal obtenida a trav\202s de los comentarios y sugerencias de los usuarios. A estos efectos, usted garantiza la autenticidad de todos aquellos datos que comunique como consecuencia de la cumplimentaci\242n de los formularios necesarios para el acceso a todos los contenidos del Portal. El usuario se compromete a actuar en forma responsable en este sitio y a tratar a otros visitantes con respeto. En caso contrario no ser\240n publicados los comentarios por alterar las normas del Portal.");
+			system("cls");
+			printf("Cines Bartolo se compromete a adoptar una pol\241tica de confidencialidad, con el objeto de proteger la privacidad de la informaci\242n personal obtenida a trav\202s de los comentarios y sugerencias de los usuarios. A estos efectos, usted garantiza la autenticidad de todos aquellos datos que comunique como consecuencia de la cumplimentaci\242n de los formularios necesarios para el acceso a todos los contenidos del Portal. El usuario se compromete a actuar en forma responsable en este sitio y a tratar a otros visitantes con respeto. En caso contrario no ser\240n publicados los comentarios por alterar las normas del Portal.\n");
 			break;
 
 		case 6:
@@ -792,4 +790,34 @@ void resetusuarios() {
 	fprintf(Usuarios, "0");
 	fclose(Usuarios);
 	return;
+}
+
+void tiempo(){
+	time_t tiempo;
+	char cad[80];
+	struct tm * pTiempo;
+
+tiempo = time( NULL );
+		pTiempo = localtime( &tiempo );
+		strftime( cad, 80, "%x, %H:%M", pTiempo );
+		printf( "\n Fecha y Hora: %s\n\n\n", cad );
+}
+
+void disponible(int horario){
+	char cad[80];
+	int hora;
+
+	time_t tiempo;
+   struct tm *ptiempo;
+
+   time( &tiempo );
+   ptiempo = localtime( &tiempo );
+   strftime(cad,80,"%H", ptiempo);
+   
+  hora = cad[0]*10+cad[1] - (541-13);
+   
+  if(hora>horario){
+ printf("Se ha pasado la hora de la sesion. La entrada sera para la sesion de mañana.\n");}
+  else {
+ printf("La entrada es para la sesion de hoy.\n");}
 }
